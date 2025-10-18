@@ -21,7 +21,7 @@
 	};
 
 	const checkInactivity = setInterval(() => {
-		idle = (Date.now() - lastInteraction > 10 * 1000);
+		idle = (Date.now() - lastInteraction > 180 * 1000);
 	}, 1000);
 
 	window.addEventListener("mousemove", resetInactivityTimer);
