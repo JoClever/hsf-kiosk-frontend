@@ -1,7 +1,7 @@
 <script>
 	import DoclistBtn from "./DoclistBtn.svelte";
 
-	let { activeDoc = $bindable(), activeCat } = $props();
+	let { activeDoc = $bindable(), activeCat = null } = $props();
         
         let documents = $derived(activeCat ? activeCat.files : {});
 </script>
@@ -10,11 +10,13 @@
 	{#if !documents || documents.length === 0}
 		<div class="text-lg text-stone-500 dark:text-stone-400 italic">Aktuell keine Dateien vorhanden.</div>
 	{:else}
-        {#each documents as document}
-            <DoclistBtn 
-                name={document.name}
-                active={activeDoc?.name === document.name} 
-                onclick={() => (activeDoc = document)} />
-        {/each}
+                {#each documents as document}
+                <DoclistBtn 
+                        file_name={document.file_name}
+                        display_name={document.display_name}
+                        active={activeDoc?.file_name === document.file_name}
+                        date={document.date}
+                        onclick={() => {activeDoc = document}} />
+                {/each}
 	{/if}
 </app-doclist>

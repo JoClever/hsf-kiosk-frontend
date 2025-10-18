@@ -4,27 +4,45 @@
 	import Navigation from "./lib/Navigation.svelte";
 	import Doclist from "./lib/Doclist.svelte";
 	import Viewer from "./lib/Viewer.svelte";
-	import categories from "./files.json";
+	import {fetchJSON} from "./lib/utils.js";
+	import { onMount } from "svelte";
 
-	let activeCat = $state(categories[0]);
+	let fetchFiles = $state(fetchJSON("files"));
+	
+	let activeCat = $state(null);
 	let activeDoc = $state(null);
+
+	// onMount lifecycle
+	onMount(() => {
+		fetchFiles = fetchJSON("files");
+		console.log(fetchJSON("files"));
+		// Any initialization logic can go here
+	});
+
 </script>
 
 <div class="w-dvw h-dvh flex flex-col bg-red-900 dark:bg-red-900">
 	<Header />
 	<main class="h-full flex flex-row bg-white dark:bg-stone-800 rounded-t-3xl overflow-hidden">
-		<Navigation {categories} bind:activeCat bind:activeDoc />
-		{#if activeCat.title === "Website"}
-			<iframe title="HSF-Website" class="flex-auto w-full h-full" src="http://www.hsf-ev.de" frameborder="0"></iframe>
-		{:else}
-			<app-contentframe class="flex-auto p-8 pr-0 pb-0 flex flex-col gap-8 bg-stone-100 dark:bg-stone-900">
-				<h1 class="text-4xl text-red-900 dark:text-red-900 font-bold">{activeCat?.title}</h1>
-				<app-content class="flex-auto min-h-0 gap-8 flex flex-row">
-					<Doclist {activeCat} bind:activeDoc />
-					<Viewer {activeDoc} />
-				</app-content>
-			</app-contentframe>
-		{/if}
+		{#await fetchFiles then categories} 
+			<Navigation {categories} bind:activeCat bind:activeDoc />
+			{#if activeCat?.display_name === "Website"}
+				<iframe title="HSF-Website" class="flex-auto w-full h-full" src="http://www.hsf-ev.de" frameborder="0"></iframe>
+			{:else}
+				<app-contentframe class="flex-auto p-8 pr-0 pb-0 flex flex-col gap-8 bg-stone-100 dark:bg-stone-900">
+					<h1 class="text-4xl text-red-900 dark:text-red-900 font-bold">{activeCat?.display_name}</h1>
+					<app-content class="flex-auto min-h-0 gap-8 flex flex-row">
+						<Doclist {activeCat} bind:activeDoc />
+						<Viewer {activeDoc} />
+					</app-content>
+				</app-contentframe>
+			{/if}
+		{:catch error}
+			<div class="flex-auto flex items-center justify-center text-lg text-stone-500 dark:text-stone-400 italic">
+				Fehler beim Laden der Dateien: {error.message}
+			</div>
+		{/await}
+		
 	</main>
 </div>
 
