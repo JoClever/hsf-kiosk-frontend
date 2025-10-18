@@ -4,6 +4,7 @@
 	import Navigation from "./lib/Navigation.svelte";
 	import Doclist from "./lib/Doclist.svelte";
 	import Viewer from "./lib/Viewer.svelte";
+	import ScreenSaver from "./lib/ScreenSaver.svelte";
 	import {fetchJSON} from "./lib/utils.js";
 	import { onMount } from "svelte";
 
@@ -12,13 +13,20 @@
 	let activeCat = $state(null);
 	let activeDoc = $state(null);
 
-	// onMount lifecycle
-	onMount(() => {
-		fetchFiles = fetchJSON("files");
-		console.log(fetchJSON("files"));
-		// Any initialization logic can go here
-	});
+	let lastInteraction = Date.now();
 
+	let idle = $state(false);
+	let resetInactivityTimer = () => {
+		lastInteraction = Date.now();
+	};
+
+	const checkInactivity = setInterval(() => {
+		idle = (Date.now() - lastInteraction > 10 * 1000);
+		console.log("idle:", idle);
+	}, 1000);
+
+	window.addEventListener("mousemove", resetInactivityTimer);
+	window.addEventListener("touchstart", resetInactivityTimer);
 </script>
 
 <div class="w-dvw h-dvh flex flex-col bg-red-900 dark:bg-red-900">
@@ -44,7 +52,5 @@
 		{/await}
 		
 	</main>
+	<ScreenSaver {idle} />
 </div>
-
-<style>
-</style>
